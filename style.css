@@ -1,0 +1,147 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: url("background.jpg") no-repeat center/cover;
+  }
+  
+  .scene {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* контент сверху, а не растягивается */
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  
+  .scene.active {
+    opacity: 1;
+    pointer-events: all;
+    z-index: 10;
+  }
+  
+  /* Конверт */
+  .envelope {
+    width: 250px;
+    height: 180px;
+    background: pink;
+    border: 2px solid #d63384;
+    position: relative;
+    cursor: pointer;
+    transition: transform 1s ease;
+  }
+  
+  .envelope.open {
+    transform: scale(1.2) rotateX(180deg);
+  }
+  
+  /* Фото (полароиды) */
+  .photo {
+    width: 200px;
+    height: 250px;
+    background: white;
+    border: 3px solid #ddd;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+    margin: 20px;
+  }
+  
+  .photo.left { align-self: flex-start; }
+  .photo.right { align-self: flex-end; }
+  
+  /* Письмо */
+  .letter {
+    width: 400px;
+    background: #fff;
+    padding: 20px;
+    border: 2px solid #d63384;
+    margin: 20px;
+    text-align: center;
+    box-shadow: 2px 2px 12px rgba(0,0,0,0.3);
+  }
+  
+  /* Карточки */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    max-width: 600px;
+    margin: 20px auto;
+  }
+  
+  .card {
+    width: 120px;
+    height: 160px;
+    background: #fb55b3;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+  
+  .card.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Стол */
+  .table {
+    width: 80%;
+    height: 80%;
+    background: #f5deb3;
+    border: 4px solid #8b4513;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .note {
+    background: #fff;
+    padding: 20px;
+    border: 2px solid #000;
+    margin-bottom: 20px;
+  }
+  
+  .photo.small {
+    width: 150px;
+    height: 200px;
+  }
+  
+  /* Кнопка */
+  .btn {
+    margin-top: 30px;
+    padding: 12px 24px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    background: #d63384;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  /* Анимация печатающегося текста */
+.typing {
+    display: inline-block;
+    border-right: 2px solid white; /* мигающая палочка */
+    white-space: nowrap;
+    overflow: hidden;
+    width: 0; /* начальная ширина */
+    animation: typing 4s steps(40, end) forwards, blink 0.7s step-end infinite;
+  }
+  
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+  
+  @keyframes blink {
+    50% { border-color: transparent; }
+  }
+  
+  
+  .btn:hover {
+    background: #a61e65;
+  }
+  
