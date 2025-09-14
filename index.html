@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Поздравление</title>
+<style>
+  :root{
+    --accent: #fb8bbf;
+    --paper: #fffaf7;
+    --polaroid-border: 14px;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,Arial,Helvetica,sans-serif}
+  body{
+    background: url('C:/Users/User/Downloads/Без названия (78) (1).jpg') center/cover no-repeat fixed;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* Общая сцена */
+.scene {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  padding: 40px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .9s ease;
+  overflow-y: auto; /* если карточек или фото много — появится скролл */
+}
+
+.scene.active { 
+  display: flex; 
+  opacity: 1; 
+  pointer-events: all; 
+  z-index: 5; 
+}
+
+/* Специально для первой сцены оставляем центрирование */
+/* Первая сцена — только конверт по центру */
+/* СЦЕНА 1: конверт и фото */
+#scene1 {
+  align-items: center;       /* центрируем конверт */
+  justify-content: center;
+  flex-direction: column;    /* элементы идут сверху вниз */
+}
+
+#scene1 .envelope-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Фото по бокам */
+#scene1 .polaroid {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 200px;
+  height: auto;
+}
+
+#scene1 .polaroid.left {
+  left: -160px;  /* расстояние слева */
+}
+
+#scene1 .polaroid.right {
+  right: -160px; /* расстояние справа */
+}
+
+/* Бумажка внутри */
+#scene1 .paper {
+  margin-top: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  max-width: 300px;
+  text-align: center;
+}
+
+
+
+/* Для второй и третьей сцены контент сверху */
+#scene2, #scene3 {
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Галерея карточек */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px;
+  width: 90%;
+  max-width: 1100px;
+  margin: 20px auto;
+}
+
+.gallery .card {
+  width: 200px;
+  max-width: 90vw;
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: all .6s cubic-bezier(.2,.9,.2,1);
+}
+
+.gallery .card.show { 
+  opacity: 1; 
+  transform: translateY(0); 
+}
+
+  .scene.active{ opacity:1; pointer-events:all; z-index:5; }
+
+  .envelope-wrap{ display:flex; align-items:center; justify-content:center; flex-direction:column; gap:18px; }
+
+  .envelope{
+    width:320px; height:210px; position:relative; perspective:1000px;
+    cursor:pointer; transform-origin:center;
+    transition:transform .9s cubic-bezier(.2,.9,.2,1);
+  }
+  .envelope .flap{
+    position:absolute; left:0; right:0; top:0; margin:auto; width:0; height:0;
+    border-left:160px solid transparent; border-right:160px solid transparent;
+    border-bottom:120px solid var(--accent);
+    transform-origin:bottom center; transform:rotateX(0deg);
+    backface-visibility:hidden; transition: transform .9s ease;
+    box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  }
+  .envelope .body{
+    position:absolute; bottom:0; left:0; right:0; margin:auto;
+    width:320px; height:90px;
+    background: linear-gradient(180deg, #fff 0%, #ffeaf2 100%);
+    border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.12);
+    border:2px solid rgba(0,0,0,0.05);
+    transform-origin:center;
+    transition: transform .9s cubic-bezier(.2,.9,.2,1);
+  }
+  .envelope.opening .flap{ transform: rotateX(-170deg) translateY(-6px); }
+  .envelope.opening .body{ transform: translateY(70px) scale(.98); }
+
+  .hint{ margin-top:6px; color:#ffc8e3; font-weight:600; font-size:18px; }
+
+  .polaroid{
+    position:absolute; width:220px; background:#fff;
+    padding: var(--polaroid-border) 12px 20px 12px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.18); border-radius:10px;
+    transform-origin:center; opacity:0;
+    transition: all .9s cubic-bezier(.2,.9,.2,1);
+  }
+  .polaroid img{ display:block; width:100%; height: auto; border-radius:6px; }
+  .polaroid.left{ left:calc(50% - 380px); top:50%; transform: translateY(-50%) rotate(-6deg) scale(.95); }
+  .polaroid.right{ left:calc(50% + 160px); top:50%; transform: translateY(-50%) rotate(6deg) scale(.95); }
+  .polaroid.visible{ opacity:1; transform: translateY(-180%) translateX(0) rotate(0) scale(1); }
+
+  .paper{
+    width:560px; max-width:88vw; background:var(--paper);
+    border-radius:10px; padding:28px;
+    box-shadow:0 18px 40px rgba(0,0,0,0.12);
+    opacity:0; transform: translateY(30px) scale(.98);
+    transition: all .9s cubic-bezier(.2,.9,.2,1);
+    text-align:center; line-height:1.5;
+  }
+  .paper.visible{ opacity:1; transform: translateY(0) scale(1); }
+  .paper h2{ margin:0 0 10px; font-size:28px; color:#111; }
+  .paper p{ margin:0; color:#333; font-size:18px; }
+
+  .btn{
+    margin-top:38px; padding:14px 30px;
+    background:var(--accent); border:0; color:#fff;
+    border-radius:12px; font-weight:700; font-size:16px;
+    cursor:pointer;
+    opacity:0; transform: translateY(8px);
+    transition: all .5s ease;
+  }
+  .btn.visible{ opacity:1; transform: translateY(0); }
+
+  .gallery{
+    display:grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap:22px; width:90%; max-width:1100px; margin-top:10px;
+  }
+  .gallery .card{
+    background:#fff; border-radius:12px; padding:18px;
+    text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.12);
+    opacity:0; transform: translateY(24px);
+    transition: all .6s cubic-bezier(.2,.9,.2,1);
+  }
+  .gallery .card.show{ opacity:1; transform: translateY(0); }
+
+  .table{
+    width:90%; max-width:950px;
+    background: linear-gradient(180deg,#f7efe9,#fff8f4);
+    border-radius:18px; padding:36px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.18);
+    text-align:center;
+  }
+  .table .paper-final{
+    background:#fff; padding:26px; border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.12);
+    display:inline-block; margin-bottom:18px;
+  }
+  .table .final-polaroids{ display:flex; gap:18px; justify-content:center; margin-top:12px; }
+  .table .final-polaroids .polaroid{ width:150px; padding:12px; }
+
+  @media(max-width:820px){
+    .polaroid.left{ left:6%; width:170px; }
+    .polaroid.right{ left:calc(100% - 190px); width:170px; }
+    .paper{ width:88vw; padding:20px; }
+  }
+</style>
+</head>
+<body>
+  <audio id="bg-music" loop preload="auto">
+    <source src="C:\Users\User\Downloads\Каспийский Груз - Любовь HD1080.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- СЦЕНА 1 -->
+  <section id="scene1" class="scene active">
+    <div class="envelope-wrap">
+      <div id="envelope" class="envelope">
+        <div class="flap"></div><div class="body"></div>
+      </div>
+      <div id="polaroidLeft" class="polaroid left"><img src="C:\Users\User\Downloads\WhatsApp Image 2025-09-14 at 21.01.24.jpeg" alt="Фоточка красивой"></div>
+      <div id="polaroidRight" class="polaroid right"><img src="C:\Users\User\Downloads\WhatsApp Image 2025-09-14 at 21.01.25.jpeg" alt="Фоточка любимой"></div>
+      <div id="paper" class="paper"><h2>Любимой @maadinqsz❤️</h2><p>С совершеннолетием тебя!</p></div>
+
+      <div style="display:flex; justify-content:center; width:100%;">
+        <button id="btn1" class="btn" aria-hidden="true">как мило</button>
+      </div>
+      <div class="hint" id="hint">❤️ Нажми на конвертик, чтобы увидеть сюрприз ❤️</div>
+    </div>
+  </section>
+
+  <!-- СЦЕНА 2 -->
+  <section id="scene2" class="scene">
+    <div class="gallery" id="gallery">
+      <div class="card"><img src="C:\Users\User\Downloads\WhatsApp Image 2025-09-14 at 21.01.25 (2).jpeg" style="width:100%;border-radius:6px"><div style="margin-top:8px;font-weight:600">крепкие обьятия🫂</div></div>
+      <div class="card"><div style="font-size:18px">Запомни одно: какие бы дни ни приходили - радостные или сложные - рядом всегда есть мы. Мы поддержим, поднимем настроение, разделим радость и подарим силы❤️</div></div>
+      <div class="card"><img src="C:\Users\User\Downloads\WhatsApp Image 2025-09-14 at 21.01.25 (3).jpeg" style="width:100%;border-radius:6px"><div style="margin-top:8px;font-weight:600">искренние улыбки🤍</div></div>
+      <div class="card"><img src="C:\Users\User\Downloads\WhatsApp Image 2025-09-14 at 21.01.25 (4).jpeg" style="width:100%;border-radius:6px"><div style="margin-top:8px;font-weight:600">теплые воспоминания☕</div></div>
+      <div class="card"><div style="font-size:18px">Пусть твоя жизнь будет такой же яркой и доброй, как эти фото. Пусть каждый день приносит радость, а рядом всегда будут те, кто искренне тебя любит и ценит 💕</div></div>
+      <div class="card"><img src="C:\Users\User\Downloads\WhatsApp Image 2025-09-14 at 21.01.25 (5).jpeg" style="width:100%;border-radius:6px"><div style="margin-top:8px;font-weight:600">греют даже зимой❄️</div></div>
+    </div>
+
+    <div style="display:flex; justify-content:center; width:100%;">
+      <button id="btn2" class="btn" aria-hidden="true">продолжаем</button>
+    </div>
+  </section>
+
+  <!-- СЦЕНА 3 -->
+  <section id="scene3" class="scene">
+    <div class="table">
+      <div class="paper-final">
+        <h2>С ДНЕМ РОЖДЕНИЯ ЖАНЫМКА</h2>
+        <p class="typing">
+            с началом удивительного периода, где всё начинает звучать иначе. Мир раскрывается новыми красками, ты смотришь на него по-новому, и он - на тебя.
+            Это не про взросление, не про правила и обязанности. Это про свободу чувствовать, мечтать глубже, смеяться искреннее, выбирать смелее.  
+            Про твоё внутреннее солнце, которое начинает светить ярче - не для кого-то, а для тебя самой.
+
+            Ты - сильнее, глубже, светлее, чем иногда сама о себе думаешь. Внутри тебя - океан идей, нежности и силы. И пусть кто-то видит только поверхность — ты знай, что в тебе уже есть всё, чтобы справиться с любым ветром.
+            Не бойся идти медленно, солнце. Всё приходит тогда, когда ты к этому готова. Даже если сейчас кажется, что многое туманно - со временем все прояснится.  
+            Главное - не предавай себя. Не гонись за тем, что не откликается в сердце. И не сомневайся в своей ценности, даже если мир будет молчать, ведь я буду с тобой.
+            
+            Ты — целый мир для меня. И тебе точно есть, что этому миру подарить и показать.
+            Желаю тебе каждый день просыпаться с чувством, что ты там, где нужно. И что внутри всё спокойно. А если и нет - знай, ты сможешь пройти и через это.
+            Иногда жизнь ставит перед нами испытания, чтобы мы вдруг поняли: внутри нас есть куда больше, чем мы думали. У тебя внутри - целая вселенная. Тихая, спокойная уверенность, что даже в трудные дни ты не потеряешь себя.  
+
+            Ты умеешь идти вперёд не громко, но уверенно. Не потому что легко, а потому что знаешь - ты сможешь. У тебя есть редкий дар: согревать других, не теряя собственного тепла. Не все умеют быть мягкими и при этом сильными. Ты умеешь.
+            Желаю тебе всегда помнить, что твой путь - особенный. Не спеши, не сравнивай. Просто иди. Мир сам подстроится под ту, кто идёт с верой в себя.
+
+            Ты самая прекрасная и невероятная девушка, которую я когда либо встречала. Ты для меня — как редкая мелодия, что играет в сердце даже в тишине.
+            С тобой рядом жизнь звучит глубже, ярче, честнее. Ты — тот человек, кого я никогда не сравню ни с кем другим.
+            В песне могут сказать о любви, но у меня к тебе — своя, особенная любовь: дружеская, верная, настоящая. Ты — мой близкий человек, без которого многое потеряло бы смысл.
+            Твои слова я помню так же, как строки любимых песен. Твоё присутствие — это моя опора, мой «HD1080» — чёткое, ясное, настоящее.
+            Спасибо тебе за то, что ты есть. Ты — важнейшая часть моей жизни.
+            Это тот момент, когда начинается не взрослая жизнь, а твоя настоящая. Та, что по сердцу.
+            С любовью и верой в тебя А.
+        </p>
+      </div>
+      <div class="final-polaroids">
+        <div class="polaroid"><img src="photo7.jpg" alt="фото" style="width:100%;border-radius:6px"></div>
+        <div class="polaroid"><img src="photo8.jpg" alt="фото" style="width:100%;border-radius:6px"></div>
+      </div>
+    </div>
+  </section>
+
+  
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const bg = document.getElementById('bg-music');
+  const envelope = document.getElementById('envelope');
+  const polL = document.getElementById('polaroidLeft');
+  const polR = document.getElementById('polaroidRight');
+  const paper = document.getElementById('paper');
+  const btn1 = document.getElementById('btn1');
+  const btn2 = document.getElementById('btn2');
+  const hint = document.getElementById('hint');
+
+  const scene1 = document.getElementById('scene1');
+  const scene2 = document.getElementById('scene2');
+  const scene3 = document.getElementById('scene3');
+
+  function showScene(id){
+    [scene1,scene2,scene3].forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function tryPlayMusic(){
+    if(!bg) return;
+    const p = bg.play();
+    if(p !== undefined){ p.catch(()=>{}); }
+  }
+
+  envelope.addEventListener('click', () => {
+    tryPlayMusic();
+    if(envelope.classList.contains('opening')) return;
+    envelope.classList.add('opening');
+    hint.style.opacity = '0';
+
+    setTimeout(()=> polL.classList.add('visible'), 700);
+    setTimeout(()=> polR.classList.add('visible'), 900);
+    setTimeout(()=> paper.classList.add('visible'), 1200);
+    setTimeout(()=>{
+      btn1.classList.add('visible');
+      btn1.setAttribute('aria-hidden','false');
+    }, 1700);
+  });
+
+  btn1.addEventListener('click', () => {
+    paper.classList.remove('visible'); polL.classList.remove('visible');
+    polR.classList.remove('visible'); btn1.classList.remove('visible');
+
+    setTimeout(()=> {
+      showScene('scene2');
+      const cards = document.querySelectorAll('#gallery .card');
+      cards.forEach((c, i) => setTimeout(()=> c.classList.add('show'), i * 350));
+      setTimeout(()=>{
+        btn2.classList.add('visible');
+        btn2.setAttribute('aria-hidden','false');
+      }, cards.length * 350 + 600);
+    }, 600);
+  });
+
+btn2.addEventListener('click', () => {
+    const cards = document.querySelectorAll('#gallery .card');
+    cards.forEach((c,i)=> setTimeout(()=> c.classList.remove('show'), i*60));
+    setTimeout(()=> {
+      showScene('scene3');
+
+      // после появления сцены запускаем печать текста
+      const typingElement = document.querySelector('#scene3 .typing');
+      if (typingElement) {
+        const text = typingElement.textContent;
+        typingElement.textContent = ""; // очищаем перед печатью
+        let i = 0;
+        function type() {
+          if (i < text.length) {
+            typingElement.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, 60); // скорость печати (меньше = быстрее)
+          }
+        }
+        type();
+      }
+    }, 400);
+  });
+
+  tryPlayMusic();
+});
+</script>
+</body>
+</html>
+        
